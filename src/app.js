@@ -6,6 +6,9 @@ import e from 'express-status-monitor'
 const app = express()
 const cache = new NodeCache()
 const regexChannelName = /"owner":{"videoOwnerRenderer":{"thumbnail":{"thumbnails":\[.*?\]},"title":{"runs":\[{"text":"(.+?)"/
+const regexHlsManifestUrl = /(?<=hlsManifestUrl":").*\.m3u8/
+const regexDashManifestUrl = /(?<=dashManifestUrl":").*\.m3u8/
+const regexThumbnail = /(?<=owner":{"videoOwnerRenderer":{"thumbnail":{"thumbnails":\[{"url":")[^=]*/
 
 const getLiveStream = async (url) => {
   // Try to get it from cache
@@ -23,11 +26,12 @@ const getLiveStream = async (url) => {
 
       if (response.ok) {
         const text = await response.text()
-        const hlsManifestUrl = text.match(/(?<=hlsManifestUrl":").*\.m3u8/)?.[0]
+        const hlsManifestUrl = text.match(regexHlsManifestUrl)?.[0]
+        const dashManifestUrl = text.match(regexDashManifestUrl)?.[0]
         const channelName = regexChannelName.exec(text)?.[1]
-        const thumbnail = text.match(/(?<=owner":{"videoOwnerRenderer":{"thumbnail":{"thumbnails":\[{"url":")[^=]*/)?.[0]
+        const thumbnail = text.match(regexThumbnail)?.[0]
 
-        data = { name: channelName, stream: hlsManifestUrl, logo: thumbnail }
+        data = { name: channelName, stream: hlsManifestUrl, logo: thumbnail, dashManifestUrl }
       }
     } catch (error) {
       // console.log(error)
