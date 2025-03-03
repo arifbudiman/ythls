@@ -31,7 +31,12 @@ const getLiveStream = async (url) => {
         const channelName = regexChannelName.exec(text)?.[1]
         const thumbnail = text.match(regexThumbnail)?.[0]
 
-        data = { name: channelName, stream: hlsManifestUrl, logo: thumbnail, dashManifestUrl }
+        data = {
+          name: channelName,
+          stream: hlsManifestUrl,
+          logo: thumbnail,
+          dashManifestUrl: dashManifestUrl
+        }
       }
     } catch (error) {
       // console.log(error)
@@ -96,7 +101,9 @@ app.get('/cache', async (req, res, nxt) => {
         items.push({
           url: key,
           name: data.name,
-          logo: data.logo
+          stream: data.stream,
+          logo: data.logo,
+          dashManifestUrl: data.dashManifestUrl
         })
       }
     }
